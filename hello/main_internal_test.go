@@ -17,11 +17,11 @@ func TestGreet(t *testing.T) {
 		want string
 	}{
 		"Empty": {
-			lang: language(""),
+			lang: "",
 			want: `unsupported language: ""`,
 		},
 		"English": {
-			lang: language("en"),
+			lang: "en",
 			want: "Hello world",
 		},
 		"Swahili": {
@@ -29,7 +29,7 @@ func TestGreet(t *testing.T) {
 			want: `unsupported language: "swa"`,
 		},
 		"French": {
-			lang: language("fr"),
+			lang: "fr",
 			want: "Bonjour le monde",
 		},
 		"Greek": {
