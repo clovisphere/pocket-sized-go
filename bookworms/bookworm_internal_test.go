@@ -22,8 +22,15 @@ var (
 func Example_main() {
 	main()
 	// Output:
-	// Here are the common books:
-	//  - The Handmaid's Tale by Margaret Atwood
+	// ** Common books **
+	// - The Handmaid's Tale by Margaret Atwood
+	//
+	// ** Recommended books **
+	// Fadi, we think you may also like:
+	// - Oryx and Crake by Margaret Atwood
+	// - Jane Eyre by Charlotte Brontë
+	// Peggy, we think you may also like:
+	// - The Bell Jar by Sylvia Plath
 }
 
 func TestBooksCount(t *testing.T) {
@@ -147,6 +154,86 @@ func TestLoadWorms_Success(t *testing.T) {
 			if err == nil && tc.wantErr {
 				t.Fatal("expected an error, go none")
 			}
+
+			if !equalBookworms(t, got, tc.want) {
+				t.Fatalf("expected %+v, got %+v", tc.want, got)
+			}
+		})
+	}
+}
+
+func TestRecommenOtherBook(t *testing.T) {
+	tests := map[string]struct {
+		input []Bookworm
+		want  []Bookworm
+	}{
+		"bookworms with the same book": {
+			input: []Bookworm{
+				{Name: "Eric", Books: []Book{janeEyre}},
+				{Name: "Judith", Books: []Book{janeEyre}},
+				{Name: "Ellen", Books: []Book{janeEyre}},
+			},
+			want: []Bookworm{
+				{Name: "Judith", Books: []Book{}},
+				{Name: "Eric", Books: []Book{}},
+				{Name: "Ellen", Books: []Book{}},
+			},
+		},
+		"bookworms with different books": {
+			input: []Bookworm{
+				{Name: "Steve", Books: []Book{janeEyre}},
+				{Name: "Maggie", Books: []Book{handmaidsTale}},
+				{Name: "Pat", Books: []Book{oryxAndCrake}},
+			},
+			want: []Bookworm{
+				{Name: "Steve", Books: []Book{handmaidsTale, oryxAndCrake}},
+				{Name: "Maggie", Books: []Book{janeEyre, oryxAndCrake}},
+				{Name: "Pat", Books: []Book{handmaidsTale, janeEyre}},
+			},
+		},
+		"duplicate books in peer shelf": {
+			input: []Bookworm{
+				{Name: "Alex", Books: []Book{janeEyre}},
+				{Name: "Sam", Books: []Book{handmaidsTale, handmaidsTale}}, // duplicate
+			},
+			want: []Bookworm{
+				{Name: "Alex", Books: []Book{handmaidsTale}},
+				{Name: "Sam", Books: []Book{janeEyre}},
+			},
+		},
+		"reader has overlap with peers": {
+			input: []Bookworm{
+				{Name: "Taylor", Books: []Book{janeEyre, handmaidsTale}},
+				{Name: "Jordan", Books: []Book{handmaidsTale, oryxAndCrake}},
+			},
+			want: []Bookworm{
+				{Name: "Taylor", Books: []Book{oryxAndCrake}},
+				{Name: "Jordan", Books: []Book{janeEyre}},
+			},
+		},
+		"single bookworm": {
+			input: []Bookworm{
+				{Name: "Solo", Books: []Book{janeEyre}},
+			},
+			want: []Bookworm{
+				{Name: "Solo", Books: []Book{}},
+			},
+		},
+		"bookworm with empty shelf": {
+			input: []Bookworm{
+				{Name: "Blank", Books: []Book{}},
+				{Name: "Reader", Books: []Book{janeEyre}},
+			},
+			want: []Bookworm{
+				{Name: "Blank", Books: []Book{janeEyre}},
+				{Name: "Reader", Books: []Book{}},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := recommendOtherBooks(tc.input)
 
 			if !equalBookworms(t, got, tc.want) {
 				t.Fatalf("expected %+v, got %+v", tc.want, got)

@@ -23,13 +23,26 @@ func main() {
 
 	commonBooks := findCommonBooks(bookworms)
 
-	fmt.Println("\nHere are the common books:")
+	fmt.Println("\n** Common books **")
 	displayBooks(commonBooks)
+
+	recommendedBooks := recommendOtherBooks(bookworms)
+
+	fmt.Println("\n** Recommended books **")
+	displayRecommendations(recommendedBooks)
 }
 
 // displayBooks prints out the titles and authors of a list of books.
 func displayBooks(books []Book) {
 	for _, book := range books {
-		fmt.Printf(" - %s by %s\n", book.Title, book.Author)
+		fmt.Printf("- %s by %s\n", book.Title, book.Author)
+	}
+}
+
+// displayRecommendations prints out book recommendations for each Bookworm.
+func displayRecommendations(bookworms []Bookworm) {
+	for _, bookworm := range bookworms {
+		fmt.Printf("%s, we think you may also like:\n", bookworm.Name)
+		displayBooks(bookworm.Books)
 	}
 }

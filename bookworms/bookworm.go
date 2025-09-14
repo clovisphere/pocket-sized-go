@@ -31,6 +31,29 @@ func (b byAuthor) Swap(i, j int) {
 	b[i], b[j] = b[j], b[i]
 }
 
+// set is a collection of unique Books.
+type set map[Book]struct{}
+
+// NewSet returns a set containing the given books.
+func NewSet(books ...Book) set {
+	s := make(set)
+	s.Add(books...)
+	return s
+}
+
+// Add inserts the given books into the set.
+func (s set) Add(books ...Book) {
+	for _, b := range books {
+		s[b] = struct{}{}
+	}
+}
+
+// Contains reports whether b is in the set.
+func (s set) Contains(b Book) bool {
+	_, ok := s[b]
+	return ok
+}
+
 // Less implements sort.Interface and
 // returns books sorted by Author then Title.
 func (b byAuthor) Less(i, j int) bool {
@@ -54,7 +77,7 @@ func booksCount(bookworms []Bookworm) map[Book]uint {
 	return count
 }
 
-// findCommonBooks returns books are on more than one bookworm's shelf.
+// findCommonBooks returns books that are on more than one bookworm's shelf.
 func findCommonBooks(bookworms []Bookworm) []Book {
 	booksOnShelves := booksCount(bookworms)
 
@@ -84,6 +107,42 @@ func loadBookworms(filePath string) ([]Bookworm, error) {
 	}
 
 	return bookworms, nil
+}
+
+// recommendOtherBooks returns a slice of Bookworm where each Bookworm contains
+// the same Name as the input, but Books replaced with recommendations. A
+// recommendation for a Bookworm consists of books found on other Bookworms'
+// shelves that the given Bookworm has not read. Each recommended book appears
+// at most once per Bookworm.
+func recommendOtherBooks(bookworms []Bookworm) []Bookworm {
+	var bw []Bookworm
+
+	for _, reader := range bookworms {
+		seen := NewSet(reader.Books...)
+		var unread []Book
+
+		for _, peer := range bookworms {
+			// Skip recommending from oneself
+			if reader.Name == peer.Name {
+				continue
+			}
+
+			for _, book := range peer.Books {
+				if seen.Contains(book) {
+					continue
+				}
+				unread = append(unread, book)
+				seen.Add(book)
+			}
+		}
+
+		bw = append(bw, Bookworm{
+			Name:  reader.Name,
+			Books: unread,
+		})
+	}
+
+	return bw
 }
 
 // sortBooks sorts the books by Author and then Title
