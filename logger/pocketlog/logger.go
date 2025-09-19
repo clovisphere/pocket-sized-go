@@ -1,28 +1,58 @@
 package pocketlog
 
+import (
+	"fmt"
+	"io"
+	"os"
+)
+
 // Logger is used to log information.
 type Logger struct {
 	threshold Level
+	output    io.Writer
 }
 
 // New returns you a logger, ready to log at the required threshold.
-func New(threshold Level) *Logger {
+// The default boutput is Stdout.
+func New(threshold Level, output io.Writer) *Logger {
+	if output == nil {
+		output = os.Stdout
+	}
+
 	return &Logger{
 		threshold: threshold,
+		output:    output,
 	}
 }
 
 // Debugf formats and prints a message if the log level is debug or higher.
 func (l *Logger) Debugf(format string, args ...any) {
-	// TODO: implement me:-)
+	if l.threshold > LevelDebug {
+		return
+	}
+
+	l.logf(format, args...)
 }
 
 // Infof formats and prints a message if the log level is info or higher.
 func (l *Logger) Infof(format string, args ...any) {
-	// TODO: implement me:-)
+	if l.threshold > LevelInfo {
+		return
+	}
+
+	l.logf(format, args...)
 }
 
 // Errorf formats and prints a message if the log message is error or higher.
 func (l *Logger) Errorf(format string, args ...any) {
-	// TODO: implement me:-)
+	if l.threshold > LevelError {
+		return
+	}
+
+	l.logf(format, args...)
+}
+
+// logf prints the message to the output.
+func (l *Logger) logf(format string, args ...any) {
+	fmt.Fprintf(l.output, format+"\n", args...)
 }
