@@ -6,7 +6,7 @@ This is my attempt at tackling, (re)creating, and building the projects found in
 
 - [x] [Hello, earth!](./hello)
 - [x] [A bookworm's digest: Playing with loops and maps](./bookworms)
-- [x] A log story: Creating a library
+- [x] [A log story: Creating a library](./logger)
 - [ ] Gordle: Play a word game in your terminal
 - [ ] Money Converter: CLI around an HTTP call
 
